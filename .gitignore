@@ -9,3 +9,4 @@ venv/
 *.code-workspace
 NEU_data/
 *.log
+runs/

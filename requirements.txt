@@ -1,6 +1,9 @@
+python
 pydantic
 pydantic-settings
 Pillow
 fastapi
 ultralytics
 uvicorn
+python-magic-bin
+python-multipart

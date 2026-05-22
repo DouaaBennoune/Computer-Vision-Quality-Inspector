@@ -78,9 +78,10 @@ def validate_upload(file: List[UploadFile]):
         if ext not in allowed_extensions:
             logger.error("File format not supported ")
             raise HTTPException(400, f"Unsupported format '{ext}'. Allowed: {allowed_extensions}")
-
+    return file
 def last_validation(file: List[UploadFile]) :
     ready_images=[]
+    img_ids = []
     if not file :
         logger.error("no files uploaded")
         raise HTTPException(400,"no files uploaded")
@@ -92,19 +93,17 @@ def last_validation(file: List[UploadFile]) :
             raise HTTPException(400, f"Unsupported format '{ext}'. Allowed: {allowed_extensions}")
         #validating a zip file
         
-        if (Path(f.filename).suffix.lower()==".zip"):
+        if (ext==".zip"):
             valid_images=validate_folder(f)
-            img_ids=[]
             for img_id,contents in valid_images:
                 valid_image = validate_file(img_id,contents)
                 ready_images.append(valid_image)
-                img_ids.append(img_ids)
-    #validating a single image
-        elif ( Path(filename).suffix.lower() in allowed_extensions):
+                img_ids.append(img_id)
+        #validating a single image
+        elif ( ext in allowed_extensions):
             contents=f.file.read()
             f.file.seek(0)
             img_id=f.filename
-            img_ids=[]
             valid_image=validate_file(img_id,contents)
             ready_images.append(valid_image)
             img_ids.append(img_id)

@@ -37,10 +37,10 @@ async def predict_defects(file: List[UploadFile] = File(...)):
                 
             
         
-        for defect in defects_list:
-            class_key=defect['defect_class']
-            if class_key in global_counts:
-                global_counts[class_key]+=defect["count"]
+            for defect in defects_list:
+                class_key=defect['defect_class']
+                if class_key in global_counts:
+                    global_counts[class_key]+=defect["count"]
         
         return PredictionSummary(
             crazing=global_counts['crazing'],

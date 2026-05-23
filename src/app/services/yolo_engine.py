@@ -20,7 +20,7 @@ class Predictor:
             logger.info("model path found , model has been loaded ")
         else : 
             logger.info("model hasnt been loaded")
-            raise HTTPException(400,f"model didnt load successfully !")
+            raise FileNotFoundError(f"model didnt load successfully from {model_path}!")
      
     
     def predict(self,file):
@@ -38,7 +38,7 @@ class Predictor:
             predictions_dir.mkdir(parents=True,exist_ok=True)
             Base_url="http://localhost:8000"
 
-            images_boxes=predicted_image[0].plot()[..., ::-1] 
+            images_boxes=predicted_image.plot()[..., ::-1] 
             
             img=Image.fromarray(images_boxes)
             #extracting image link
@@ -46,8 +46,8 @@ class Predictor:
             img.save(save_path)
             image_link=f"{Base_url}/static/predictions/{img_id}"
             #extracting detected img class with count
-            detected_classes=predicted_image[0].boxes.cls.cpu().numpy()
-            names_dict=predicted_image[0].names
+            detected_classes=predicted_image.boxes.cls.cpu().numpy()
+            names_dict=predicted_image.names
             class_counts = {}
             for cls_id in detected_classes:
                  class_name= names_dict[int(cls_id)]

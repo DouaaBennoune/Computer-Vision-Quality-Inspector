@@ -11,3 +11,4 @@ NEU_data/
 *.log
 runs/
 */runs/
+src/static/predictions/

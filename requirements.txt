@@ -7,3 +7,4 @@ ultralytics
 uvicorn
 python-magic-bin
 python-multipart
+streamlit

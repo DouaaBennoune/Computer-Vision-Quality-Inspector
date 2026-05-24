@@ -4,10 +4,10 @@ from pathlib import Path
 import os
 from dataclasses import dataclass
 from typing import List
-from app.models.schemas import PredictionSummary,YoloPredictions,DefectsCount
-from app.services.yolo_engine import Predictor
-from app.utils.validators import validate_upload,last_validation
-from app.core.config import logger
+from backend.models.schemas import PredictionSummary,YoloPredictions,DefectsCount
+from backend.services.yolo_engine import Predictor
+from backend.utils.validators import validate_upload,last_validation
+from backend.core.config import logger
 
 router=APIRouter()
 yolo_service=Predictor()

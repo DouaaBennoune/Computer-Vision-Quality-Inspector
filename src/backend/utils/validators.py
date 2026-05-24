@@ -3,7 +3,7 @@ from pathlib import Path
 from PIL import Image
 import io, zipfile
 import magic
-from app.core.config import logger
+from backend.core.config import logger
 from typing import List
 
 allowed_extensions = {".zip",".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}

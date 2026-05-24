@@ -11,7 +11,7 @@ import io
 from typing import List
 
 #API_URL=os.getenv("API_URL")
-API_URL = "http://127.0.0.1:8000/api/v1/predict"
+API_URL = os.getenv("BACKEND_API_URL", "http://localhost:8000/api/v1/predict")
 
 st.set_page_config(
     page_title="Computer Vision Quality Inspector",
@@ -120,21 +120,28 @@ if 'selected_status' not in st.session_state:
 
 
 def Upload_images(uploaded_files: List):
-    """send an image or multiple images or a zip file to FastAPI and get Defects Detection"""
     try:
+        response = requests.post(API_URL, files=uploaded_files, timeout=60)
         
-        response=requests.post(API_URL,files=uploaded_files)
-        if response.status_code==200:
+        if response.status_code == 200:
             return response.json()
         else:
-            error_detail=response.json().get('detail','Unknown error')
-            st.error(f"API Error : {error_detail}")
-        
+            
+            try:
+                error_detail = response.json().get('detail', 'Unknown error')
+            except Exception:
+                error_detail = response.text or f"HTTP {response.status_code}"
+            st.error(f"API Error {response.status_code}: {error_detail}")
+            return None
+
     except requests.exceptions.ConnectionError:
-        st.error("could not connect to Backend!")
+        st.error("Could not connect to backend!")
         return None
-    except Exception as e : 
-        st.error(f"an unexpected error occured: {str(e)}")
+    except requests.exceptions.Timeout:
+        st.error("Request timed out — the model may still be loading, try again.")
+        return None
+    except Exception as e:
+        st.error(f"Unexpected error: {str(e)}")
         return None
 def create_zip_of_images(api_data):
     """Fetches predicted images from the API links and packages them into a ZIP file in memory."""
@@ -154,7 +161,8 @@ def create_zip_of_images(api_data):
             except Exception as e:
                 pass 
                 
-    return zip_buffer.getvalue()    
+    return zip_buffer.getvalue()  
+zip_data = None  
 #navigation bar
 st.markdown('<div class= "nav-bar">',unsafe_allow_html=True)
 col1, col2, col3, col4, col5 = st.columns([8, 1, 1, 1, 1])
@@ -267,7 +275,9 @@ elif(st.session_state.current_page=='upload'):
 #page dashboard
 
 elif (st.session_state.current_page=='dashboard'):
+    
     if not st.session_state.predictions:
+        
         st.markdown("""
 <h1 style="color:#1d1b22;font-size:60px;text-align: center;font-family:var(--font-display);margin-top: 100px;">No inspection yet</h1>
 <h4 style="color:#886e82;font-size:25px;margin-bottom: 20px;text-align: center;font-family: var(--font-display);">Run an inspection from the Upload page to populate this dashboard.</h4> 
@@ -275,19 +285,22 @@ elif (st.session_state.current_page=='dashboard'):
 """,unsafe_allow_html=True)
 
         if st.button("back to Upload",use_container_width=True):
+            
             c1,c2,c3=st.columns([2,1,2])
             with c2:
                 st.session_state.current_page='upload'
     else:
         api_data=st.session_state.predictions
+        
         df_pred=pd.DataFrame(api_data['dashboard'])
         st.markdown("""
 <h1 style="color:#1d1b22;font-size:50px;margin-bottom: 1px;margin-left: 35px;font-family: var(--font-display);">Detailed Data Registry</h1>
 
 """,unsafe_allow_html=True)
+        
         if not df_pred.empty:
             c1,c2=st.columns([1,1])
-
+            
 
             with c1:
                 st.markdown(f"""
@@ -307,7 +320,9 @@ elif (st.session_state.current_page=='dashboard'):
                 </div>
             
     """,unsafe_allow_html=True)
+                
                 with c2:
+                    
                     st.markdown(f"""
                                 
                 <div class="cards" style="background-color:#ffffff;padding:15px;">
@@ -328,6 +343,13 @@ elif (st.session_state.current_page=='dashboard'):
             <br></br>
             <br></br>
     """,unsafe_allow_html=True)
+                    st.markdown("<br>", unsafe_allow_html=True) 
+                    api_data=st.session_state.predictions    
+                    zip_data = create_zip_of_images(api_data)
+                        
+               
+
+
             table_df = df_pred[['id', 'defects', 'image_link']].copy()
             table_df['defects'] = table_df['defects'].apply(
                 lambda x: ", ".join([f"{d['defect_class']} ({d['count']})" for d in x]) if isinstance(x, list) else x
@@ -358,62 +380,55 @@ elif st.session_state.current_page=='docs':
         c1,c2=st.columns([1,1])
         with c1:
             st.markdown("""
-             <div class="cards" style="background-color:#ffffff;padding:15px;">
-                     <h3 style="color:#1d1b22;font-size: 25px;font-weight:bold;font-family: var(--font-display);">Crazing</h3>
-                     <h4 style="color:#6b6470;font-size:18px;font-family: var(--font-display);">Network of fine surface cracks</h4>
-            </div>
-             <br></br>           
             <div class="cards" style="background-color:#ffffff;padding:15px;">
-                     <h3 style="color:#1d1b22;font-size: 25px;font-weight:bold;font-family: var(--font-display);">Patches</h3>
-                     <h4 style="color:#6b6470;font-size:18px;font-family: var(--font-display);">Discolored regions / irregular texture</h4>
+                    <h3 style="color:#1d1b22;font-size: 25px;font-weight:bold;font-family: var(--font-display);">Crazing</h3>
+                    <h4 style="color:#6b6470;font-size:18px;font-family: var(--font-display);">Network of fine surface cracks</h4>
             </div>
-             <br></br>   
+            <br></br>           
             <div class="cards" style="background-color:#ffffff;padding:15px;">
-                     <h3 style="color:#1d1b22;font-size: 25px;font-weight:bold;font-family: var(--font-display);">Rolled-in Scale</h3>
-                     <h4 style="color:#6b6470;font-size:18px;font-family: var(--font-display);">Oxide scale pressed into surface during rolling</h4>
+                    <h3 style="color:#1d1b22;font-size: 25px;font-weight:bold;font-family: var(--font-display);">Patches</h3>
+                    <h4 style="color:#6b6470;font-size:18px;font-family: var(--font-display);">Discolored regions / irregular texture</h4>
+            </div>
+            <br></br>   
+            <div class="cards" style="background-color:#ffffff;padding:15px;">
+                    <h3 style="color:#1d1b22;font-size: 25px;font-weight:bold;font-family: var(--font-display);">Rolled-in Scale</h3>
+                    <h4 style="color:#6b6470;font-size:18px;font-family: var(--font-display);">Oxide scale pressed into surface during rolling</h4>
             </div>
         
 """,unsafe_allow_html=True)
         with c2:
                 st.markdown("""
                             
-             <div class="cards" style="background-color:#ffffff;padding:15px;">
-                     <h3 style="color:#1d1b22;font-size: 25px;font-weight:bold;font-family: var(--font-display);">Inclusion</h3>
-                     <h4 style="color:#6b6470;font-size:18px;font-family: var(--font-display);">Foreign material embedded in surface</h4>
-            </div>
-                     <br></br>       
             <div class="cards" style="background-color:#ffffff;padding:15px;">
-                     <h3 style="color:#1d1b22;font-size: 25px;font-weight:bold;font-family: var(--font-display);">Pitted Surface</h3>
-                     <h4 style="color:#6b6470;font-size:18px;font-family: var(--font-display);">Small cavities or pits in the metal</h4>
+                    <h3 style="color:#1d1b22;font-size: 25px;font-weight:bold;font-family: var(--font-display);">Inclusion</h3>
+                    <h4 style="color:#6b6470;font-size:18px;font-family: var(--font-display);">Foreign material embedded in surface</h4>
             </div>
-             <br></br>   
+                    <br></br>       
             <div class="cards" style="background-color:#ffffff;padding:15px;">
-                     <h3 style="color:#1d1b22;font-size: 25px;font-weight:bold;font-family: var(--font-display);">Scratches</h3>
-                     <h4 style="color:#6b6470;font-size:18px;font-family: var(--font-display);">Linear grooves on the surface</h4>
+                    <h3 style="color:#1d1b22;font-size: 25px;font-weight:bold;font-family: var(--font-display);">Pitted Surface</h3>
+                    <h4 style="color:#6b6470;font-size:18px;font-family: var(--font-display);">Small cavities or pits in the metal</h4>
+            </div>
+            <br></br>   
+            <div class="cards" style="background-color:#ffffff;padding:15px;">
+                    <h3 style="color:#1d1b22;font-size: 25px;font-weight:bold;font-family: var(--font-display);">Scratches</h3>
+                    <h4 style="color:#6b6470;font-size:18px;font-family: var(--font-display);">Linear grooves on the surface</h4>
             </div>
         
 """,unsafe_allow_html=True)
 header_col, button_col = st.columns([7, 3])
         
-        
-with button_col:
-        st.markdown("<br>", unsafe_allow_html=True) # push button down slightly to align with title
-            
-        zip_data = create_zip_of_images(api_data)
-            
-            # Show the Streamlit Download Button
-        st.download_button(
-                label="📥 Download Annotated Images (.ZIP)",
-                data=zip_data,
-                file_name="AI_Inspected_Images.zip",
-                mime="application/zip",
-                use_container_width=True 
-            )
+if zip_data is not None:
+    st.download_button(
+        label="📥 Download Annotated Images (.ZIP)",
+        data=zip_data,
+        file_name="AI_Inspected_Images.zip",
+        mime="application/zip",
+        use_container_width=True
+    )
 
 
 
 
 
 
-
-                    
+                

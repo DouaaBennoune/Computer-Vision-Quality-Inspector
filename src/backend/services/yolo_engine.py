@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from pathlib import Path
-from app.core.config import logger
+from backend.core.config import logger
 import os
 from PIL import Image
 from fastapi import HTTPException
@@ -36,7 +36,7 @@ class Predictor:
             """ returns the id ,  image link , predicted class and count  in a format that is suited for the Schema DefectsCount"""
             predictions_dir=Path("static/predictions")
             predictions_dir.mkdir(parents=True,exist_ok=True)
-            Base_url="http://localhost:8000"
+            Base_url="http://backend:8000"
 
             images_boxes=predicted_image.plot()[..., ::-1] 
             

@@ -13,10 +13,14 @@
 <img width="2476" height="1394" alt="image" src="https://github.com/user-attachments/assets/50f820fb-126c-432d-bc6d-a1a0c8c6e267" />
 
 ## Quick Start
+
 git clone https://github.com/DouaaBennoune/Computer-Vision-Quality-Inspector.git
+
 cd src
+
 docker compose up --build
 
 ## Open the app
 Streamlit UI -> http://localhost:8501
+
 FastAPI Swagger docs -> http://localhost:8000/docs

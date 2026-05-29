@@ -4,8 +4,7 @@ piic.ipynb
 __pycache__/
 *.pyc
 venv/
-.env
-*.env
+
 *.code-workspace
 NEU_data/
 *.log

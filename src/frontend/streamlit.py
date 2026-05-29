@@ -200,9 +200,9 @@ if (st.session_state.current_page== 'home'):
                 Detect every defect.
             </h1>
             <h1 style="font-size: 40px; color:#6b6470; font-family: var(--font-display); margin-bottom: 10px;">
-                An AI-powered computer vision inspector for steel surfaces.<br>
-                Upload a batch, get a full defect report — classified, counted and <br>
-                annotated — in seconds.
+                An AI-powered computer vision inspector built for real-world steel manufacturing.<br>
+                Engineered to conquer imperfect factory lighting and harsh shadows.<br>
+                Upload a batch, get a full defect report — classified and annotated — in seconds.
             </h1>
         
 
@@ -234,14 +234,14 @@ if (st.session_state.current_page== 'home'):
          st.markdown("""
              <div class="cards" style="background-color:#ffffff;">
                      <h3 style="color:#1d1b22;font-size: 30px;font-weight:bold;margin-bottom: 10px;font-family: var(--font-display);">YOLOv8n Inference</h3>
-                     <h4 style="color:#6b6470;font-size:25px;font-family: var(--font-display);">State-of-the-art object detection fine-tuned on NEU steel defect data.</h4>
+                     <h4 style="color:#6b6470;font-size:25px;font-family: var(--font-display);">Trained on a synthetically augmented NEU dataset to guarantee accuracy in low-light, real-world conditions.</h4>
             </div>
                     """, unsafe_allow_html=True)
      with c3:
          st.markdown("""
              <div class="cards" style="background-color:#ffffff;">
                      <h3 style="color:#1d1b22;font-size: 30px;font-weight:bold;margin-bottom: 10px;font-family: var(--font-display);">Dashboard</h3>
-                     <h4 style="color:#6b6470;font-size:25px;font-family: var(--font-display);">Aggregate KPIs and per-image breakdowns with bounding-box overlays.</h4>
+                     <h4 style="color:#6b6470;font-size:25px;font-family: var(--font-display);">Aggregate defect KPIs, per-image breakdowns, and downloadable ZIP reports with bounding-box overlays.</h4>
             </div>
                     """, unsafe_allow_html=True)
 #UPLOAD PAGE
@@ -373,7 +373,10 @@ elif st.session_state.current_page=='docs':
 
         st.markdown("""
         <h1 style="color:#1d1b22;font-size:60px;font-family:var(--font-display);margin-top: 20px;margin-left: 0px;">Documentation</h1>
-        <h4 style="color:#886e82;font-size:25px;margin-bottom: 20px;font-family: var(--font-display);margin-left: 0px;">The AI Quality Inspector is a computer-vision dashboard that classifies six common steel surface defects: crazing, inclusion, patches, pitted surface, rolled-in scale,and scratches. The frontend uploads images to a local FastAPI backend running a YOLOv8 object-detection model by Ultralytics and renders the results — both aggregate KPIs and per-image annotated previews.</h4> 
+        <h4 style="color:#886e82;font-size:25px;margin-bottom: 20px;font-family: var(--font-display);margin-left: 0px;">The AI Quality Inspector is an enterprise-grade computer vision dashboard that classifies six common steel surface defects: crazing, inclusion, patches, pitted surface, rolled-in scale, and scratches. </h4> 
+        <h4 style="color:#886e82;font-size:22px;margin-bottom: 30px;font-family: var(--font-display);margin-left: 0px; line-height: 1.5;">
+        <b>Engineering for the Real World:</b> In industrial environments, factory lighting is almost never perfect. Standard AI models fail when exposed to shadows and glare. To solve this, our underlying YOLOv8n object-detection model was trained on a synthetically enhanced NEU dataset. By applying non-linear highlight compression and sensor noise simulations, the AI learned "feature invariance"—allowing it to confidently identify defects even in the harshest low-light conditions.
+        </h4> 
         <h1 style="color:#1d1b22;font-size:60px;font-family:var(--font-display);margin-top: 20px;margin-left: 0px;">Defect Classes</h1>
         
         """,unsafe_allow_html=True)

@@ -23,7 +23,7 @@ async def predict_defects(file: List[UploadFile] = File(...)):
         results=[]
         global_counts = {
             'crazing': 0, 'inclusion': 0, 'patches': 0, 
-            'pitted_surface': 0, 'rolled_in_scale': 0, 'scratches': 0
+            'pitted_surface': 0, 'rolled-in_scale': 0, 'scratches': 0
         }
         for img , id in zip(predicted_images,img_ids) :
             
@@ -47,7 +47,7 @@ async def predict_defects(file: List[UploadFile] = File(...)):
             inclusion= global_counts['inclusion'],
             patches= global_counts['patches'],
             pitted_surface= global_counts['pitted_surface'],
-            rolled_in_scale= global_counts['rolled_in_scale'],
+            rolled_in_scale= global_counts['rolled-in_scale'],
             scratches= global_counts['scratches'],
             
             dashboard= results

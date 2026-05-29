@@ -7,7 +7,7 @@ class DefectClasses(str,Enum):
     inclusion= "inclusion"
     patches= "patches"
     pitted_surface= "pitted_surface"
-    rolled_in_scale= "rolled_in_scale"
+    rolled_in_scale= "rolled-in_scale"
     scratches= "scratches"
 
 class DefectsCount(BaseModel)  :

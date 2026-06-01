@@ -1,4 +1,13 @@
 services:
+  mqtt-broker:
+    image: eclipse-mosquitto:2
+    container_name: c-v-q-i-mqtt
+    ports:
+      - "1883:1883"
+    # This automatically configures it to allow local connections
+    command: sh -c "echo 'listener 1883' > /mosquitto/config/mosquitto.conf && echo 'allow_anonymous true' >> /mosquitto/config/mosquitto.conf && mosquitto -c /mosquitto/config/mosquitto.conf"
+    restart: always
+
   backend:
     build:
       context: ./backend
@@ -11,6 +20,8 @@ services:
     volumes:
       - ./backend/best.pt:/src/backend/best.pt
       - ./static:/src/static
+    depends_on:
+    - mqtt-broker
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
       interval: 10s

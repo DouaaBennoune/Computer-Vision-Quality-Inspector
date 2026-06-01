@@ -15,14 +15,11 @@ class DefectsCount(BaseModel)  :
     defect_class : DefectClasses
     count : int
     
-
-
 class YoloPredictions(BaseModel):
     "Schema for individual image prediction details"
     id: str
     defects  : List[DefectsCount]
     image_link : str
-
 
 class PredictionSummary(BaseModel):
     "Schema for the total number of each defect class"
@@ -35,6 +32,7 @@ class PredictionSummary(BaseModel):
     scratches: int
     
     dashboard: List[YoloPredictions]
+
 
 class ErrorResponse(BaseModel):
     detail: str

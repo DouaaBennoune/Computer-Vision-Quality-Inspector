@@ -9,8 +9,14 @@ import os
 import zipfile
 import io
 from typing import List
+import av
+import cv2
+from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
+import websocket
+import base64
+import json
+import numpy as np
 
-#API_URL=os.getenv("API_URL")
 API_URL = os.getenv("BACKEND_API_URL", "http://localhost:8000/api/v1/predict")
 
 st.set_page_config(
@@ -165,7 +171,7 @@ def create_zip_of_images(api_data):
 zip_data = None  
 #navigation bar
 st.markdown('<div class= "nav-bar">',unsafe_allow_html=True)
-col1, col2, col3, col4, col5 = st.columns([8, 1, 1, 1, 1])
+col1, col2, col3, col4, col5,col6 = st.columns([7, 1, 1, 1, 1,1])
 with col1:
     
     st.markdown("""
@@ -189,7 +195,10 @@ with col5:
     if st.button("Docs", use_container_width=True):
         st.session_state.current_page = 'docs'
         st.rerun()
-
+with col6:
+    if st.button("PLC Simulation",use_container_width=True):
+        st.session_state.current_page= 'Live_PLC_Simulation'
+        st.rerun()
 st.divider()
 
 # Home page
@@ -428,7 +437,49 @@ if zip_data is not None:
         mime="application/zip",
         use_container_width=True
     )
+elif st.session_state.current_page=="Live_PLC_Simulation":
+    st.markdown("""
+        <h5 style="color:#886e82;font-size:15px;margin-left: 200px;font-family: var(--font-mono);">Step 02 ● Edge AI Execution</h5>
+        <h1 style="color:#1d1b22;font-size:50px;margin-left: 200px;font-family: var(--font-display);">Real-Time PLC Simulation</h1>
+        <h4 style="color:#886e82;font-size:18px;margin-left: 200px;font-family: var(--font-display);">Live camera feed streamed to FastAPI WebSockets. Severe defects instantly trigger MQTT PLC alarms.</h4> 
+        <br>
+    """, unsafe_allow_html=True)
 
+    c1, c2, c3 = st.columns([1.5, 7, 1.5])
+    with c2:
+        class YOLOVideoProcessor(VideoProcessorBase):
+            def __init__(self):
+                # convert URL to the WS simulation URL
+                ws_url = API_URL.replace("http", "ws").replace("/predict", "/ws/simulation")
+                self.ws = websocket.WebSocket()
+                try: self.ws.connect(ws_url)
+                except Exception as e: print(f"WS Connect Error: {e}")
+
+            def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
+                img = frame.to_ndarray(format="bgr24")
+                try:
+                    # Send raw frame to FastAPI
+                    _, buffer = cv2.imencode('.jpg', img)
+                    self.ws.send(base64.b64encode(buffer).decode('utf-8'))
+                    
+                    # Receive annotated frame + alarm data
+                    result = self.ws.recv()
+                    data = json.loads(result)
+
+                    # Decode the AI processed image
+                    img_bytes = base64.b64decode(data["image"])
+                    annotated_img = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
+
+                    #  RED ALARM 
+                    if data.get("alarm"):
+                        cv2.rectangle(annotated_img, (0, 0), (annotated_img.shape[1], annotated_img.shape[0]), (0, 0, 255), 20)
+                        cv2.putText(annotated_img, "MACHINE STOP: " + data["reason"], (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+
+                    return av.VideoFrame.from_ndarray(annotated_img, format="bgr24")
+                except Exception:
+                    return frame # Return normal frame if connection drops
+
+        webrtc_streamer(key="factory-sim", video_processor_factory=YOLOVideoProcessor)
 
 
 

@@ -12,3 +12,6 @@ uvicorn
 python-magic
 python-multipart
 numpy==1.26.4
+websockets
+paho-mqtt
+pyModbusTCP

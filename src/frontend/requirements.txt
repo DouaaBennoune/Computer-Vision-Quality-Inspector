@@ -2,3 +2,7 @@ streamlit
 requests
 pandas
 numpy==1.26.4
+websocket-client
+opencv-python-headless
+av
+streamlit-webrtc

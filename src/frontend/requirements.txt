@@ -6,3 +6,4 @@ websocket-client
 opencv-python-headless
 av
 streamlit-webrtc
+paho-mqtt

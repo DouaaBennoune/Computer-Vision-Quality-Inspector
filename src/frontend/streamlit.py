@@ -16,6 +16,7 @@ import websocket
 import base64
 import json
 import numpy as np
+import paho.mqtt.publish as publish
 
 API_URL = os.getenv("BACKEND_API_URL", "http://localhost:8000/api/v1/predict")
 
@@ -76,6 +77,17 @@ st.markdown("""
             font-weight: bold;
             color: #1d1b22 !important;
             }
+             button[kind="primary"] {
+            background-color: #FF3B30 !important;
+            color: #FFFFFF !important;
+            border: none !important;
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4) !important;
+        }
+        button[kind="primary"]:hover {
+            background-color: #D32F2F !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 12px rgba(211, 47, 47, 0.6) !important;}
+
             [data-testid="stDataFrame"] {
             background-color: #9B8EC7;
             }
@@ -169,9 +181,21 @@ def create_zip_of_images(api_data):
                 
     return zip_buffer.getvalue()  
 zip_data = None  
+mqtt_broker="mqtt-broker"
+mqtt_topic="factory/line1/control"
+def trigger_factory_alarm(command:str,reason:str):
+    """sends a command to the Factory I/O conveyor belt"""
+    payload=json.dumps({"command":command,"reason":reason})
+    try:
+        publish.single(mqtt_topic,payload,hostname=mqtt_broker)
+        print(f"MQTT Signal Sent : {command} ({reason})")
+    except Exception as e:
+        print(f"Failed To Send MQTT Signal: {e}")
+
+
 #navigation bar
 st.markdown('<div class= "nav-bar">',unsafe_allow_html=True)
-col1, col2, col3, col4, col5,col6 = st.columns([7, 1, 1, 1, 1,1])
+col1, col2, col3, col4, col6,col5 = st.columns([7, 1, 1, 1, 1,1])
 with col1:
     
     st.markdown("""
@@ -375,6 +399,8 @@ elif (st.session_state.current_page=='dashboard'):
                 )
         else:
             st.info("No equipment found in this category.")
+
+#Docs page
 elif st.session_state.current_page=='docs':
     c1,c2,c3=st.columns([1.99,7,1.99])
 
@@ -386,6 +412,9 @@ elif st.session_state.current_page=='docs':
         <h4 style="color:#886e82;font-size:22px;margin-bottom: 30px;font-family: var(--font-display);margin-left: 0px; line-height: 1.5;">
         <b>Engineering for the Real World:</b> In industrial environments, factory lighting is almost never perfect. Standard AI models fail when exposed to shadows and glare. To solve this, our underlying YOLOv8n object-detection model was trained on a synthetically enhanced NEU dataset. By applying non-linear highlight compression and sensor noise simulations, the AI learned "feature invariance"—allowing it to confidently identify defects even in the harshest low-light conditions.
         </h4> 
+        <h4 style="color:#886e82;font-size:22px;margin-bottom: 30px;font-family: var(--font-display);margin-left: 0px; line-height: 1.5;">
+        <b style="color:#1d1b22;">Industrial IoT (IIoT) & Safety Latching:</b> The Live Simulation page features a Direct-to-Device IoT architecture. Using <b>WebRTC</b> and <b>WebSockets</b>, live video is processed at high speeds. When a critical defect is found, FastAPI publishes an <b>MQTT</b> emergency stop payload. An Edge Gateway translates this to <b>Modbus TCP</b>, physically halting a 3D Factory I/O conveyor belt. To comply with factory safety standards, the system triggers a <b>Safety Latch</b>, locking the motor until an operator manually clears the hazard via the UI Reset button.
+        </h4>
         <h1 style="color:#1d1b22;font-size:60px;font-family:var(--font-display);margin-top: 20px;margin-left: 0px;">Defect Classes</h1>
         
         """,unsafe_allow_html=True)
@@ -480,8 +509,58 @@ elif st.session_state.current_page=="Live_PLC_Simulation":
                     return frame # Return normal frame if connection drops
 
         webrtc_streamer(key="factory-sim", video_processor_factory=YOLOVideoProcessor)
+    
+    st.markdown("""
+    <h1 style="color:#1d1b22;font-size:50px;margin-left: 200px;font-family: var(--font-display);">
+        Operator Controls
+    </h1>
 
+    <h4 style="color:#886e82;font-size:18px;margin-left: 200px;font-family: var(--font-display);">
+        Once the operator confirms that conditions are safe, they activate the “RESET MACHINE SAFETY LATCH” control.<br><br>
+        This action:<br>
+        • Clears the safety latch<br>
+        • Sends a RESUME_CONVEYOR command to the IIoT Gateway<br>
+        • Re‑energizes the Modbus coils controlling the conveyor motor<br>
+        • Returns the line to normal operating mode<br>
+    </h4>
+    """, unsafe_allow_html=True)
 
+    c1, c2, c3 = st.columns([1.5, 7, 1.5])
+    with c2:    
+        st.markdown("""
+        <style>
+
+        div.stButton > button[kind="primary"],
+        div[data-testid="stButton"] > button[kind="primary"],
+        div[data-testid="stButton"] button[data-testid="baseButton-primary"] {
+            background-color: #FF3B30 !important;
+            color: #FFFFFF !important;
+            border: 2px solid #FF3B30 !important;
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4) !important;
+        }
+        
+        div.stButton > button[kind="primary"]:hover,
+        div[data-testid="stButton"] > button[kind="primary"]:hover,
+        div[data-testid="stButton"] button[data-testid="baseButton-primary"]:hover {
+            background-color: #D32F2F !important;
+            border: 2px solid #D32F2F !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 12px rgba(211, 47, 47, 0.6) !important;
+        }
+        
+        
+        div.stButton > button[kind="primary"]:hover p,
+        div.stButton > button[kind="primary"]:hover span,
+        div[data-testid="stButton"] button[data-testid="baseButton-primary"]:hover p,
+        div[data-testid="stButton"] button[data-testid="baseButton-primary"]:hover span {
+            color: #FFFFFF !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+        
+        if st.button(" RESET MACHINE SAFETY LATCH", type="primary", width="stretch"):
+            trigger_factory_alarm("RESET_LATCH", "Operator Command")
 
 
 

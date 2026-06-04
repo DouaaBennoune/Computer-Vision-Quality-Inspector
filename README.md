@@ -46,6 +46,9 @@ The AI never controls the machine directly (an industry security best-practice).
 <img width="2488" height="1166" alt="image" src="https://github.com/user-attachments/assets/080cc7f8-6d07-4314-85b2-6fe92922171a" />
 <img width="2491" height="860" alt="image" src="https://github.com/user-attachments/assets/c9fa20b7-db05-4217-bda6-4b55a2b83354" />
 
+## PLC simulation Page
+<img width="2484" height="1401" alt="image" src="https://github.com/user-attachments/assets/990b8cf7-11d6-4b90-9835-45e303cbd6cc" />
+
 ## Documentation Page
 <img width="2476" height="1394" alt="image" src="https://github.com/user-attachments/assets/50f820fb-126c-432d-bc6d-a1a0c8c6e267" />
 
